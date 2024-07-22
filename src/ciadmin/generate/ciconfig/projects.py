@@ -58,6 +58,7 @@ class Project:
     branches: List[Branch] = attr.ib(
         type=list, default=[], converter=lambda b: [Branch(**d) for d in b]
     )
+    hook_branches: List[str] = attr.ib(type=list, default=[])
     default_branch: str = attr.ib(
         type=str,
         default=attr.Factory(
