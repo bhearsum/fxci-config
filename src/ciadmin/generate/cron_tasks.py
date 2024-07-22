@@ -31,6 +31,14 @@ async def make_hooks(project, environment):
         raise Exception("Unknown cron task type.")
 
     context = {
+        # TODO: default branch / level should go away, and `make_hooks` sohuld be called for each
+        # branch instead of just one
+        # this may get complicated where we have `*` in branches though?
+        # we certainly can't generate hooks for all branches where `*` is a legitimate branch
+        # but we might want to support it for things like `releases*`? we don't want to have to
+        # explicitly add release branches
+        # alternative, we could have a `hook_branches` to make it explicit. not 100% sure
+        # how this plays with in tree actions though. do we need an explicit list for that too?
         "level": project.default_branch_level,
         "trust_domain": project.trust_domain,
         "hookGroupId": hookGroupId,

@@ -119,6 +119,9 @@ def project_match(grantee, project):
         return False
     if not match(grantee.repo_type, project.repo_type):
         return False
+    # TODO: project match callers should either:
+    # - provide a branch
+    # - match branches on their own after matching project
     if not match(grantee.level, project.get_level(project.default_branch)):
         return False
     if not match(grantee.alias, project.alias):

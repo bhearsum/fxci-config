@@ -3,20 +3,47 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 
 import pytest
+import re
 import yaml
-from tcadmin.util.sessions import with_aiohttp_session
+from tcadmin.util.sessions import aiohttp_session, with_aiohttp_session
 
 from ciadmin.generate import tcyml
 from ciadmin.generate.ciconfig.projects import Project
 
+_HEAD_REGEX = re.compile(r" symref=HEAD:([^ ]+) ")
+_GIT_UPLOAD_PACK_URL = "{repo_base_url}/info/refs?service=git-upload-pack"
+
+
+async def _get_git_default_branch(project):
+    git_url = _GIT_UPLOAD_PACK_URL.format(repo_base_url=project.repo)
+    # XXX You must set a git-like user agent otherwise Git http endpoints don't
+    # return any data.
+    headers = {"User-Agent": "git/mozilla-ci-admin"}
+    session = aiohttp_session()
+    async with session.get(git_url, headers=headers) as response:
+        response.raise_for_status()
+        result = await response.text()
+
+    match = _HEAD_REGEX.search(result)
+    if match is None:
+        raise ValueError(f"{git_url} does not contain data about the default branch")
+
+    remote_branch_name = match.group(1)
+    branch_name = remote_branch_name.replace("refs/heads/", "")
+    return branch_name
+
 
 async def _get_pull_request_policy(project):
+    # Pull request policy is special compared to most other things that exist
+    # on a branch in that Taskcluster-Github only pays attention to what's on
+    # the default branch. For that reason, we specifically look it up from
+    # there rather than verifying the policy on all configured branches
+    # for a project.
     config = yaml.safe_load(
         await tcyml.get(
             project.repo,
             repo_type=project.repo_type,
-            revision=None,
-            default_branch=project.default_branch,
+            ref=await _get_git_default_branch(project),
         )
     )
     return config.get("policy", {}).get("pullRequests")

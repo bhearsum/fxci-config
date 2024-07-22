@@ -14,7 +14,9 @@ _cache = {}
 _lock = {}
 
 
-async def get(repo_path, repo_type="hg", revision=None, default_branch=None):
+# TODO: we should never need a default branch; an explicit one should be passed, and any callers
+# may need to operate on multiple branches rather than sjust one
+async def get(repo_path, repo_type="hg", ref=None):
     """
     Get `.taskcluster.yml` from 'default' (or the given revision) at the named
     repo_path.  Note that this does not parse the yml (so that it can be hashed
@@ -23,21 +25,17 @@ async def get(repo_path, repo_type="hg", revision=None, default_branch=None):
     If the file is not found, this returns None.
     """
     if repo_type == "hg":
-        if revision is None:
-            revision = default_branch or "default"
-        url = "{}/raw-file/{}/.taskcluster.yml".format(repo_path, revision)
+        url = "{}/raw-file/{}/.taskcluster.yml".format(repo_path, ref)
     elif repo_type == "git":
-        if revision is None:
-            revision = default_branch or "master"
         if repo_path.startswith("https://github.com/"):
             if repo_path.endswith("/"):
                 repo_path = repo_path[:-1]
-            url = "{}/raw/{}/.taskcluster.yml".format(repo_path, revision)
+            url = "{}/raw/{}/.taskcluster.yml".format(repo_path, ref)
         elif repo_path.startswith("git@github.com:"):
             if repo_path.endswith(".git"):
                 repo_path = repo_path[:-4]
             url = "{}/raw/{}/.taskcluster.yml".format(
-                repo_path.replace("git@github.com:", "https://github.com/"), revision
+                repo_path.replace("git@github.com:", "https://github.com/"), ref
             )
         else:
             raise Exception(

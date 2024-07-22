@@ -62,7 +62,7 @@ async def hash_taskcluster_ymls():
     for p in tcyml_projects:
         rv[p.alias] = {}
 
-        for b in set([b.name for b in p.branches] + [p.default_branch]):
+        for b in set([b.name for b in p.branches]):
             # Can't fetch a .taskcluster.yml for a globbed branch
             # TODO: perhaps we should do this for partly globbed branches,
             # eg: release* ?
@@ -105,7 +105,7 @@ async def hash_taskcluster_ymls():
                     }
 
                 future = asyncio.ensure_future(
-                    tcyml.get(p.repo, repo_type=p.repo_type, default_branch=b)
+                    tcyml.get(p.repo, repo_type=p.repo_type, ref=b)
                 )
                 future.add_done_callback(functools.partial(process, p, b))
                 futures.append(future)
@@ -340,7 +340,8 @@ async def update_resources(resources):
         hooks_to_make = {}  # {hash: content}, for uniqueness
         for project in projects:
             for branch_name in set(
-                [b.name for b in project.branches] + [project.default_branch]
+                # should be able to drop it here too
+                [b.name for b in project.branches]
             ):
                 # We don't have taskcluster.ymls from globbed branches;
                 # see comment in hash_taskcluster_ymls

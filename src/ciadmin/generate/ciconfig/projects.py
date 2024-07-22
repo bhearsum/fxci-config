@@ -56,13 +56,6 @@ class Project:
     branches = attr.ib(
         type=list, default=[], converter=lambda b: [Branch(**d) for d in b]
     )
-    default_branch = attr.ib(
-        type=str,
-        default=attr.Factory(
-            lambda self: "main" if self.repo_type == "git" else "default",
-            takes_self=True,
-        ),
-    )
     trust_domain = attr.ib(type=str, default=None)
     trust_project = attr.ib(type=str, default=None)
     parent_repo = attr.ib(type=str, default=None)
@@ -174,7 +167,3 @@ class Project:
                     return b.level
 
             return None
-
-    @property
-    def default_branch_level(self):
-        return self.get_level(self.default_branch)
