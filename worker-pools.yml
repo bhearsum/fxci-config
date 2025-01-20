@@ -381,6 +381,161 @@ pools:
             - *scratch-disk
             - *scratch-disk
           machine_type: n2-standard-32
+  - pool_id: '{pool-group}/b-linux-large-gcp-d2g-podman'
+    description: Workers using generic-worker on Linux with D2G capability.
+    owner: release+tc-workers@mozilla.com
+    email_on_error: true
+    variants:
+      - pool-group: translations-1
+    provider_id:
+      by-chain-of-trust:
+        trusted: fxci-level3-gcp
+        default: fxci-level1-gcp
+    config:
+      worker-config:
+        genericWorker:
+          config:
+            # 2592900s is 30 days plus 900 seconds to account for https://github.com/taskcluster/taskcluster/issues/7423
+            maxTaskRunTime: 2592900
+            enableInteractive: true
+            d2g-podmanConfig:
+              enableD2G: true
+              containerEngine: podman
+            headlessTasks: true
+            ed25519SigningKeyLocation: '/etc/generic-worker/ed25519_key'
+      minCapacity: 0
+      maxCapacity: 1000
+      implementation: generic-worker/worker-runner-linux-multi
+      regions: [us-central1, us-west1]
+      image: ubuntu-2404-headless
+      instance_types:
+        - minCpuPlatform: Intel Cascadelake
+          disks:
+            - <<: *persistent-disk
+              diskSizeGb: 60
+          machine_type: n2-highmem-32
+  - pool_id: '{pool-group}/b-linux-large-gcp-d2g-podman-300gb'
+    description: Big workers with big disks - intended for Firefox Translations only
+    owner: release+tc-workers@mozilla.com
+    email_on_error: true
+    variants:
+      - pool-group: translations-1
+    provider_id:
+      by-chain-of-trust:
+        trusted: fxci-level3-gcp
+        default: fxci-level1-gcp
+    config:
+      lifecycle:
+        # low inactivity timeout because these workers are very expensive
+        queueInactivityTimeout: 1800
+      worker-config:
+        genericWorker:
+          config:
+            # 2592900s is 30 days plus 900 seconds to account for https://github.com/taskcluster/taskcluster/issues/7423
+            maxTaskRunTime: 2592900
+            enableInteractive: true
+            d2g-podmanConfig:
+              enableD2G: true
+              containerEngine: podman
+            headlessTasks: true
+            ed25519SigningKeyLocation: '/etc/generic-worker/ed25519_key'
+      minCapacity: 0
+      maxCapacity: 1000
+      implementation: generic-worker/worker-runner-linux-multi
+      regions: [us-central1, us-west1]
+      image: ubuntu-2404-headless
+      instance_types:
+        - minCpuPlatform: Intel Cascadelake
+          disks:
+            - <<: *persistent-disk
+              diskSizeGb: 300
+          machine_type: n2-highmem-32
+  - pool_id: '{pool-group}/b-linux-v100-gpu-d2g-podman'
+    description: Worker for machine learning and other high GPU tasks
+    owner: release+tc-workers@mozilla.com
+    variants:
+      - pool-group: translations-1
+    email_on_error: true
+    provider_id:
+      by-chain-of-trust:
+        trusted: fxci-level3-gcp
+        default: fxci-level1-gcp
+    config:
+      lifecycle:
+        # low inactivity timeout because these workers are very expensive
+        queueInactivityTimeout: 1800
+      worker-config:
+        genericWorker:
+          config:
+            # 2592900s is 30 days plus 900 seconds to account for https://github.com/taskcluster/taskcluster/issues/7423
+            maxTaskRunTime: 2592900
+            enableInteractive: true
+            d2gConfig:
+              enableD2G: true
+              allowGPUs: true
+              containerEngine: podman
+            headlessTasks: true
+            ed25519SigningKeyLocation: '/etc/generic-worker/ed25519_key'
+      minCapacity: 0
+      # We use 4 GPUs per instance across 4 regions with a limit of 128
+      # per region at any given time. 4 regions * 4 GPUs = 512 total GPUs
+      # 512 GPUs / 4 per instance = 128 instances possibly running at once.
+      maxCapacity: 128
+      implementation: generic-worker/worker-runner-linux-multi
+      regions: [us-central1, us-west1, us-east1]
+      image: ubuntu-2404-headless-alpha
+      instance_types:
+        - minCpuPlatform: Intel Skylake
+          disks:
+            - <<: *persistent-disk
+              diskSizeGb: 75
+          machine_type: n1-highmem-8
+          guestAccelerators:
+            - acceleratorCount: 1
+              acceleratorType: nvidia-tesla-v100
+  - pool_id: '{pool-group}/b-linux-v100-gpu-d2g-podman-4'
+    description: Worker for machine learning and other high GPU tasks
+    owner: release+tc-workers@mozilla.com
+    variants:
+      - pool-group: translations-1
+    email_on_error: true
+    provider_id:
+      by-chain-of-trust:
+        trusted: fxci-level3-gcp
+        default: fxci-level1-gcp
+    config:
+      lifecycle:
+        # low inactivity timeout because these workers are very expensive
+        queueInactivityTimeout: 1800
+      worker-config:
+        genericWorker:
+          config:
+            # 2592900s is 30 days plus 900 seconds to account for https://github.com/taskcluster/taskcluster/issues/7423
+            maxTaskRunTime: 2592900
+            enableInteractive: true
+            d2gConfig:
+              enableD2G: true
+              allowGPUs: true
+              containerEngine: podman
+            headlessTasks: true
+            ed25519SigningKeyLocation: '/etc/generic-worker/ed25519_key'
+      minCapacity: 0
+      # We use 4 GPUs per instance across 4 regions with a limit of 128
+      # per region at any given time. 4 regions * 4 GPUs = 512 total GPUs
+      # 512 GPUs / 4 per instance = 128 instances possibly running at once.
+      maxCapacity: 128
+      implementation: generic-worker/worker-runner-linux-multi
+      regions: [us-central1, us-west1, us-east1]
+      image: ubuntu-2404-headless-alpha
+      instance_types:
+        - minCpuPlatform: Intel Skylake
+          disks:
+            - <<: *persistent-disk
+              diskSizeGb: 75
+          machine_type: n1-highmem-8
+          guestAccelerators:
+            - acceleratorCount: 4
+              acceleratorType: nvidia-tesla-v100
   - pool_id: '{pool-group}/b-linux-large-gcp-d2g'
     description: Workers using generic-worker on Linux with D2G capability.
     owner: release+tc-workers@mozilla.com
