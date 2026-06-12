@@ -45,6 +45,7 @@ def _filter_out_parsed_url(attr, *args, **kwargs):
                         "level": None,
                     },
                 ],
+                # TODO: remove me and other references
                 "default_branch": "default",
                 "cron": {"targets": []},
                 "features": {},

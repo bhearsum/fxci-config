@@ -91,6 +91,14 @@ def add_scopes_for_projects(grant, grantee, add_scope, projects):
         if (
             "*" in non_branch_jobs
             and project.repo_type == "git"
+            # this can probably be replaced by any(branch.level == 1)
+            # or possible this block can be removed altogether?
+            # we should stop mixing things like pull requests (which aren't tied to
+            # the default branch level) with others (which should be tied to a specific
+            # branch or other originating event
+            # this is probably the least scoped out part of this work and will require
+            # more thought, testing, and sanity checking. ideally this is simply an
+            # implementation issue though, and we end up with no grant changes at all
             and project.default_branch_level != 1
         ):
             # Github mixes pull-requests and other tasks under the same prefix
@@ -154,6 +162,7 @@ def add_scopes_for_projects(grant, grantee, add_scope, projects):
 
         for job in non_branch_jobs:
             roleId = format_role_id(project, job, pr_policy)
+            # see above comment
             level = project.default_branch_level
 
             # If the grantee has a level, use the default_branch_level to filter out

@@ -86,6 +86,9 @@ async def hash_taskcluster_ymls():
         # hooks for them. Substring globs may still exist, and are
         # supported.
         configured_branches = [b.name for b in p.branches if b.name != "*"]
+        # TODO: we should simply not support the case where `*` is the only branch
+        # configured to avoid the need for this `default_branch` reference.
+
         # The default branch is considered to be _always_ configured, even if
         # not explicitly named in `branches`. This is primarily to ensure that
         # cases where `*` is the only branch explicitly listed, that we still
@@ -130,6 +133,7 @@ async def hash_taskcluster_ymls():
                     }
 
                 future = asyncio.ensure_future(
+                    # TODO: this invocation will need adjusting after tcyml.get is updated
                     tcyml.get(p.repo, repo_type=p.repo_type, default_branch=b)
                 )
                 future.add_done_callback(functools.partial(process, p, b))

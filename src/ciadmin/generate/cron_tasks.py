@@ -34,6 +34,15 @@ async def make_hooks(project, environment):
         raise Exception("Unknown cron task type.")
 
     context = {
+        # TODO: we can't reasonably generate cron tasks on all branches, but
+        # we do need to support cron tasks on more than one branch in some repos
+        # (eg: the firefox repo).
+        # the latter will involve dealing with `hookId` naming conflicts (right now
+        # they only include the repo name)
+        # we will probably want to add an explicit list of `cron_branches` in projects.yml
+        # which probably ought not to support globbing
+        # https://bugzilla.mozilla.org/show_bug.cgi?id=2030902 has some thoughts on this too
+        # in any case, we'll need this and everything below it called for each cron-enabled branch
         "level": project.default_branch_level,
         "trust_domain": project.trust_domain,
         "hookGroupId": hookGroupId,
@@ -45,6 +54,7 @@ async def make_hooks(project, environment):
         "repo_type": project.repo_type,
         "cron_options": [],
         "allow_input": False,
+        # see above comment
         "branch": project.default_branch,
         "cron_notify_emails": project.cron.get(
             "notify_emails", cron_config.get("notify_emails", [])
@@ -105,6 +115,7 @@ async def make_hooks(project, environment):
         pulse_bindings = target_desc.get("bindings", [])
         # Default to allowing input if we are bound to a pulse exchgange.
         allow_input = target_desc.get("allow-input", bool(pulse_bindings))
+        # see above comment
         branch = target_desc.get("branch", project.default_branch)
 
         target_context = copy.deepcopy(context)

@@ -2,6 +2,10 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file, You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 
+# TODO: see https://github.com/mozilla-releng/fxci-config/compare/main...bhearsum:fxci-config:wip-no-default-branch?expand=1#diff-a1cf479ae2f828258f0dc110337cf7a7b5dd27b71a92720728d531aa0a05087f for how to handle this file when dropping `default_branch` from projects.yml.
+# short version: query github to find the default branch (rather than having it hardcoded in this repo)
+# note: we'll need to make sure we do this in a way that doesn't get rate limited, eg: with a github_token
+
 import pytest
 import yaml
 from tcadmin.util.sessions import with_aiohttp_session

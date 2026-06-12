@@ -54,6 +54,7 @@ class Project:
     branches = attr.ib(
         type=list, default=[], converter=lambda b: [Branch(**d) for d in b]
     )
+    # TODO: drop me
     default_branch = attr.ib(
         type=str,
         default=attr.Factory(
@@ -169,6 +170,7 @@ class Project:
 
             return None
 
+    # TODO: drop me
     @property
     def default_branch_level(self):
         return self.get_level(self.default_branch)

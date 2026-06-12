@@ -22,7 +22,9 @@ async def make_hook(project):
     task = jsone.render(
         task_template,
         {
-            "level": project.default_branch_level,
+            # hg repos always have the same default branch, and this code will go away
+            # sometime in 2026 or 2027
+            "level": project.get_level("default"),
             "trust_domain": project.trust_domain,
             "hookGroupId": hookGroupId,
             "hookId": hookId,

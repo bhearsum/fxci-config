@@ -15,6 +15,8 @@ _cache = {}
 _lock = {}
 
 
+# TODO: we should never need a default branch; an explicit one should be passed, and any callers
+# may need to operate on multiple branches rather than just one
 async def get(repo_path, repo_type="hg", revision=None, default_branch=None):
     """
     Get `.taskcluster.yml` from 'default' (or the given revision) at the named

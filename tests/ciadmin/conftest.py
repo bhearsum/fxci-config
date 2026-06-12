@@ -81,6 +81,7 @@ def sample_projects():
                     "level": 3,
                 },
             ],
+            # TODO: remove me
             default_branch="main",
             repo="https://github.com/mozilla/example2",
             repo_type="git",
